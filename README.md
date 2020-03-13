@@ -2,7 +2,7 @@
 Twitch channel points overlay for OBS
 
 ## Usage
-Simply open file in browser and add parameters:
+Simply open file in browser or OBS browser source and add parameters:
 - channelId - ID of channel which you want notifications about
 - showTime - for how long notification will be shown
 - title - title of notifications which can include variables:
