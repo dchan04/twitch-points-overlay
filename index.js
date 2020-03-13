@@ -20,7 +20,7 @@ function sleep(miliseconds) {
 }
 
 function replaceAll(text, find, replaceWith) {
-    var re = new RegExp(find, 'g');
+    let re = new RegExp(find, "g");
     return text.replace(re, replaceWith);
 }
 
