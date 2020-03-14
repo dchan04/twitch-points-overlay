@@ -1,5 +1,7 @@
 // Params: channelId, showTime, title (variables: {user}, {reward}, {price})
 
+const ChatClient = require("twitch-chat-client").default;
+
 let params;
 (window.onpopstate = function () {
     let match,
@@ -93,6 +95,26 @@ window.onload = () => {
         }
     }
 
+    if (params.botChannelName) {
+        (async () => {
+            let chatClient = new ChatClient()
+
+            chatClient.onPrivmsg((_, user, message, msg) => {
+                if (msg.tags.get("msg-id") === "highlighted-message") {
+                    notifications.push({
+                        image: "https://static-cdn.jtvnw.net/automatic-reward-images/highlight-4.png",
+                        title: params.highlightTitle ? params.highlightTitle : "Highlight My Message",
+                        price: params.highlightPrice ? parseInt(params.highlightPrice) : 500,
+                        user: user,
+                        text: message,
+                    });
+                }
+            })
+            chatClient.onRegister(async () => await chatClient.join(params.botChannelName))
+            await chatClient.connect();
+        })()
+    }
+
     let ws = undefined;
     let pong = false;
     let interval = false;
@@ -107,7 +129,7 @@ window.onload = () => {
                 return;
             notificationShowing = true;
             image.setAttribute("style", `background-image: url("${notif.image}")`);
-            title.innerText = replaceAll(replaceAll(replaceAll(params.title, "{user}", notif.user), "{reward}", notif.title), "{price}", notif.price);
+            title.innerText = params.title ? replaceAll(replaceAll(replaceAll(params.title, "{user}", notif.user), "{reward}", notif.title), "{price}", notif.price) : `${notif.user} spent ${notif.price} on ${notif.title}`;
             message.innerText = notif.text;
             container.setAttribute("class", "");
             if (params.audioUrl && (audioPrices.length === 0 || audioPrices.indexOf(notif.price) !== -1)) {
@@ -138,7 +160,7 @@ window.onload = () => {
                     console.log("TTS error:", e)
                 }
             }
-            await sleep(parseInt(params.showTime));
+            await sleep(parseInt(params.showTime ? params.showTime : 7500));
             container.setAttribute("class", "hide");
         }
     }, 1000);

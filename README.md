@@ -1,6 +1,11 @@
 # twitch-points-overlay
 Twitch channel points overlay for OBS
 
+## Building 
+- Install all modules with yarn
+- Install browserify
+- Run browserify index.js -o bundle.js
+
 ## Usage
 Simply open file in browser or OBS browser source and add parameters:
 - channelId - ID of channel which you want notifications about
@@ -22,5 +27,8 @@ Simply open file in browser or OBS browser source and add parameters:
 - showPrices - comma separated list of prices on which notification is shown
 - audioPrices - comma separated list of prices on which audio is played
 - ttsPrices - comma separated list of prices on which tts is enabled
+- botChannelName - channel name for chatbot to listen for "Highlight My Message" redemptions
+- highlightTitle - custom title instead of "Highlight My Message" 
+- highlightPrice - custom highlight price instead of default 500
 
 Example: file:///path/to/index.html?channelId=562422&showTime=7500&imageStyle=height:250px&titleColor=red&title={user} spent {price} on {reward}
