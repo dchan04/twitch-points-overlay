@@ -30,6 +30,69 @@ window.onload = () => {
     const title = document.getElementById("points-notification-title");
     const message = document.getElementById("points-notification-message");
 
+    let textStyle = "";
+    
+    if (params.textColor) {
+        textStyle += `color: ${params.textColor};`;
+    } else {
+        textStyle += "color: white;";
+    }
+    if (params.textSize) {
+        textStyle += `font-size: ${params.textSize};`;
+    } else {
+        textStyle += "font-size: 18px;";
+    }
+    if (params.textStyle) {
+        textStyle += params.textStyle;
+    }
+
+    message.setAttribute("style", textStyle);
+
+    let titleStyle = "";
+    if (params.titleColor) {
+        titleStyle += `color: ${params.titleColor};`;
+    } else {
+        titleStyle += "color: white;";
+    }
+    if (params.titleSize) {
+        titleStyle += `font-size: ${params.titleSize};`;
+    } else {
+        titleStyle += "font-size: 25px;";
+    }
+    if (params.titleStyle) {
+        titleStyle += params.titleStyle;
+    }
+    title.setAttribute("style", titleStyle);
+
+    if (params.imageStyle) {
+        image.setAttribute("style", params.imageStyle);
+    }
+
+    let showPrices = [];
+    let audioPrices = [];
+    let ttsPrices = [];
+
+    if (params.showPrices) {
+        let items = params.showPrices.split(",");
+        for (item of items) {
+            showPrices.push(parseInt(item));
+        }
+    }
+
+    if (params.audioPrices) {
+        let items = params.audioPrices.split(",");
+        for (item of items) {
+            audioPrices.push(parseInt(item));
+        }
+    }
+
+    if (params.ttsPrices) {
+        let items = params.ttsPrices.split(",");
+        for (item of items) {
+            ttsPrices.push(parseInt(item));
+        }
+    }
+
     let ws = undefined;
     let pong = false;
     let interval = false;
@@ -40,15 +103,45 @@ window.onload = () => {
     setInterval(async () => {
         if (!notificationShowing && notifications.length > 0) {
             let notif = notifications.pop();
+            if (showPrices.length !== 0 && showPrices.indexOf(notif.price) === -1)
+                return;
             notificationShowing = true;
             image.setAttribute("style", `background-image: url("${notif.image}")`);
             title.innerText = replaceAll(replaceAll(replaceAll(params.title, "{user}", notif.user), "{reward}", notif.title), "{price}", notif.price);
             message.innerText = notif.text;
             container.setAttribute("class", "");
+            if (params.audioUrl && (audioPrices.length === 0 || audioPrices.indexOf(notif.price) !== -1)) {
+                try {
+                    audio = new Audio();
+                    audio.src = params.audioUrl;
+                    audio.volume = params.audioVolume ? parseFloat(params.audioVolume) : 1;
+                    audio.play();
+                    await new Promise((res) => {
+                        audio.onended = res;
+                        audio.onerror = res;
+                    })
+                } catch (e) {
+                    console.log("Audio playback error:", e)
+                }
+            }
+            if (params.tts && (ttsPrices.length === 0 || ttsPrices.indexOf(notif.price) !== -1)) {
+                try {
+                    let tts = new Audio();
+                    tts.src = `https://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&client=tw-ob&q=${notif.text}&tl=ru`;
+                    tts.volume = parseFloat(params.tts);
+                    tts.play();
+                    await new Promise((res) => {
+                        tts.onended = res;
+                        tts.onerror = res;
+                    })
+                } catch (e) {
+                    console.log("TTS error:", e)
+                }
+            }
             await sleep(parseInt(params.showTime));
             container.setAttribute("class", "hide");
         }
-    }, 5000);
+    }, 1000);
 
     function connect() {
         ws = new WebSocket("wss://pubsub-edge.twitch.tv");
@@ -82,6 +175,7 @@ window.onload = () => {
                     switch (o.data.topic) {
                         case `community-points-channel-v1.${params.channelId}`:
                             let msg = JSON.parse(o.data.message);
+                            console.log(msg);
                             switch (msg.type) {
                                 case "reward-redeemed":
                                     let reward = msg.data.redemption.reward;
