@@ -16,7 +16,9 @@ Simply open file in browser or OBS browser source and add parameters:
 - titleColor - notification title color
 - titleSize - notification title size
 - imageStyle - css applied to reward image
-- tts - tts volume, if not set tts is disabled
+- audioUrl - url of audio to play
+- audioVolume - volume (from 0.0 to 1.0) of audio
+- tts - tts volume (from 0.0 to 1.0), if not set tts is disabled
 - showPrices - comma separated list of prices on which notification is shown
 - audioPrices - comma separated list of prices on which audio is played
 - ttsPrices - comma separated list of prices on which tts is enabled
