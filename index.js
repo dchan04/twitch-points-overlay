@@ -125,14 +125,17 @@ window.onload = () => {
     setInterval(async () => {
         if (!notificationShowing && notifications.length > 0) {
             let notif = notifications.pop();
+            console.log("Notification showing", notif);
             if (showPrices.length !== 0 && showPrices.indexOf(notif.price) === -1)
                 return;
+            console.log("Price check passed");
             notificationShowing = true;
             image.setAttribute("style", `background-image: url("${notif.image}")`);
             title.innerText = params.title ? replaceAll(replaceAll(replaceAll(params.title, "{user}", notif.user), "{reward}", notif.title), "{price}", notif.price) : `${notif.user} spent ${notif.price} on ${notif.title}`;
             message.innerText = notif.text;
             container.setAttribute("class", "");
             if (params.audioUrl && (audioPrices.length === 0 || audioPrices.indexOf(notif.price) !== -1)) {
+                console.log("Playing audio", params.audioUrl);
                 try {
                     audio = new Audio();
                     audio.src = params.audioUrl;
@@ -140,13 +143,14 @@ window.onload = () => {
                     audio.play();
                     await new Promise((res) => {
                         audio.onended = res;
-                        audio.onerror = res;
+                        audio.onerror = (e) => { console.log(e); res() };
                     })
                 } catch (e) {
                     console.log("Audio playback error:", e)
                 }
             }
             if (params.tts && (ttsPrices.length === 0 || ttsPrices.indexOf(notif.price) !== -1)) {
+                console.log("Playing TTS");
                 try {
                     let tts = new Audio();
                     tts.src = `https://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&client=tw-ob&q=${notif.text}&tl=ru`;
@@ -154,13 +158,14 @@ window.onload = () => {
                     tts.play();
                     await new Promise((res) => {
                         tts.onended = res;
-                        tts.onerror = res;
+                        audio.onerror = (e) => { console.log(e); res() };
                     })
                 } catch (e) {
                     console.log("TTS error:", e)
                 }
             }
             await sleep(parseInt(params.showTime ? params.showTime : 7500));
+            notificationShowing = true;
             container.setAttribute("class", "hide");
         }
     }, 1000);
@@ -193,6 +198,9 @@ window.onload = () => {
                     disconnect();
                     connect();
                     break;
+                case "RESPONCE":
+                    console.log("PubSub responce ", o.error)
+                    break;
                 case "MESSAGE":
                     switch (o.data.topic) {
                         case `community-points-channel-v1.${params.channelId}`:
@@ -204,7 +212,7 @@ window.onload = () => {
                                     let imageUrl = undefined;
 
                                     let img = reward.image;
-                                    let defimg = reward.image;
+                                    let defimg = reward.default_image;
 
                                     if (img) {
                                         if (img.url_4x) {
@@ -223,13 +231,18 @@ window.onload = () => {
                                             imageUrl = defimg.url_1x;
                                         }
                                     }
-                                    notifications.push({
+                                    else {
+                                        imageUrl = params.defImg ? params.defImg : "https://static-cdn.jtvnw.net/custom-reward-images/default-4.png"
+                                    }
+                                    let notif = {
                                         image: imageUrl,
                                         title: reward.title,
                                         price: reward.cost,
                                         user: msg.data.redemption.user.display_name,
                                         text: msg.data.redemption.user_input,
-                                    });
+                                    };
+                                    console.log("Notification queued", notif);
+                                    notifications.push(notif);
                                     break;
                             }
                             break;

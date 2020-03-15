@@ -32,3 +32,4 @@ Simply open file in browser or OBS browser source and add parameters:
 - highlightPrice - custom highlight price instead of default 500
 
 Example: file:///path/to/index.html?channelId=562422&showTime=7500&imageStyle=height:250px&titleColor=red&title={user} spent {price} on {reward}
+Or use github pages: https://33kk.github.io/twitch-points-overlay/?channelId=562422&showTime=7500&imageStyle=height:250px&titleColor=red&title={user} spent {price} on {reward}
