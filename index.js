@@ -31,7 +31,9 @@ window.onload = () => {
     const image = document.getElementById("points-notification-image");
     const title = document.getElementById("points-notification-title");
     const message = document.getElementById("points-notification-message");
-
+    
+    let tts = new GoogleTTS(params.ttsLang ? params.ttsLang : "en");
+    
     let textStyle = "";
     
     if (params.textColor) {
@@ -152,14 +154,15 @@ window.onload = () => {
             if (params.tts && (ttsPrices.length === 0 || ttsPrices.indexOf(notif.price) !== -1)) {
                 console.log("Playing TTS");
                 try {
-                    let tts = new Audio();
-                    tts.src = `https://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&client=tw-ob&q=${notif.text}&tl=ru`;
-                    tts.volume = parseFloat(params.tts);
-                    tts.play();
-                    await new Promise((res) => {
-                        tts.onended = res;
-                        audio.onerror = (e) => { console.log(e); res() };
-                    })
+                    await new Promise((res, rej) => {
+                        tts.play(notif.text, params.ttsLang ? params.ttsLang : "en", (err) => {
+                            if (err) {
+                                rej(err);
+                            } else {
+                                res(err);
+                            }
+                        })
+                    });
                 } catch (e) {
                     console.log("TTS error:", e)
                 }
