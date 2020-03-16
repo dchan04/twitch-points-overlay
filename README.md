@@ -35,4 +35,4 @@ Simply open file in browser or OBS browser source and add parameters:
 - img - image url to show on all rewards
 
 Example: file:///path/to/index.html?channelId=562422&showTime=7500&imageStyle=height:250px&titleColor=red&title={user} spent {price} on {reward}
-Or use github pages: https://33kk.github.io/twitch-points-overlay/?channelId=562422&showTime=7500&imageStyle=height:250px&titleColor=red&title={user} spent {price} on {reward}
+Or use github pages (tts wont work): https://33kk.github.io/twitch-points-overlay/?channelId=562422&showTime=7500&imageStyle=height:250px&titleColor=red&title={user} spent {price} on {reward}
