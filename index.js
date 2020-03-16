@@ -130,7 +130,7 @@ window.onload = () => {
                 return;
             console.log("Price check passed");
             notificationShowing = true;
-            image.setAttribute("style", `background-image: url("${notif.image}")`);
+            image.setAttribute("style", `background-image: url("${params.img ? params.img : notif.image}")`);
             title.innerText = params.title ? replaceAll(replaceAll(replaceAll(params.title, "{user}", notif.user), "{reward}", notif.title), "{price}", notif.price) : `${notif.user} spent ${notif.price} on ${notif.title}`;
             message.innerText = notif.text;
             container.setAttribute("class", "");
@@ -159,7 +159,7 @@ window.onload = () => {
                 }
             }
             await sleep(parseInt(params.showTime ? params.showTime : 7500));
-            notificationShowing = true;
+            notificationShowing = false;
             container.setAttribute("class", "hide");
         }
     }, 1000);

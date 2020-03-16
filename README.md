@@ -24,12 +24,15 @@ Simply open file in browser or OBS browser source and add parameters:
 - audioUrl - url of audio to play
 - audioVolume - volume (from 0.0 to 1.0) of audio
 - tts - tts volume (from 0.0 to 1.0), if not set tts is disabled
+- ttsLang - text to speech language
 - showPrices - comma separated list of prices on which notification is shown
 - audioPrices - comma separated list of prices on which audio is played
 - ttsPrices - comma separated list of prices on which tts is enabled
 - botChannelName - channel name for chatbot to listen for "Highlight My Message" redemptions
 - highlightTitle - custom title instead of "Highlight My Message" 
 - highlightPrice - custom highlight price instead of default 500
+- defImg - image url to show on rewards without icon
+- img - image url to show on all rewards
 
 Example: file:///path/to/index.html?channelId=562422&showTime=7500&imageStyle=height:250px&titleColor=red&title={user} spent {price} on {reward}
 Or use github pages: https://33kk.github.io/twitch-points-overlay/?channelId=562422&showTime=7500&imageStyle=height:250px&titleColor=red&title={user} spent {price} on {reward}
