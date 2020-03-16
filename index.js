@@ -32,8 +32,6 @@ window.onload = () => {
     const title = document.getElementById("points-notification-title");
     const message = document.getElementById("points-notification-message");
     
-    let tts = new GoogleTTS(params.ttsLang ? params.ttsLang : "en");
-    
     let textStyle = "";
     
     if (params.textColor) {
@@ -154,15 +152,8 @@ window.onload = () => {
             if (params.tts && (ttsPrices.length === 0 || ttsPrices.indexOf(notif.price) !== -1)) {
                 console.log("Playing TTS");
                 try {
-                    await new Promise((res, rej) => {
-                        tts.play(notif.text, params.ttsLang ? params.ttsLang : "en", (err) => {
-                            if (err) {
-                                rej(err);
-                            } else {
-                                res(err);
-                            }
-                        })
-                    });
+                    await GoogleTTS.textToSpeech(notif.text, params.ttsLang ? params.ttsLang : "en");
+                    console.log("TTS ended");
                 } catch (e) {
                     console.log("TTS error:", e)
                 }
