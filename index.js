@@ -122,47 +122,50 @@ window.onload = () => {
     let notifications = [];
 
     let notificationShowing = false;
-    setInterval(async () => {
-        if (!notificationShowing && notifications.length > 0) {
-            let notif = notifications.pop();
-            console.log("Notification showing", notif);
-            if (showPrices.length !== 0 && showPrices.indexOf(notif.price) === -1)
-                return;
-            console.log("Price check passed");
-            notificationShowing = true;
-            image.setAttribute("style", `background-image: url("${params.img ? params.img : notif.image}")`);
-            title.innerText = params.title ? replaceAll(replaceAll(replaceAll(params.title, "{user}", notif.user), "{reward}", notif.title), "{price}", notif.price) : `${notif.user} spent ${notif.price} on ${notif.title}`;
-            message.innerText = notif.text;
-            container.setAttribute("class", "");
-            if (params.audioUrl && (audioPrices.length === 0 || audioPrices.indexOf(notif.price) !== -1)) {
-                console.log("Playing audio", params.audioUrl);
-                try {
-                    audio = new Audio();
-                    audio.src = params.audioUrl;
-                    audio.volume = params.audioVolume ? parseFloat(params.audioVolume) : 1;
-                    audio.play();
-                    await new Promise((res) => {
-                        audio.onended = res;
-                        audio.onerror = (e) => { console.log(e); res() };
-                    })
-                } catch (e) {
-                    console.log("Audio playback error:", e)
+    (async () => {
+        while (true) {
+            if (!notificationShowing && notifications.length > 0) {
+                let notif = notifications.pop();
+                console.log("Notification showing", notif);
+                if (showPrices.length !== 0 && showPrices.indexOf(notif.price) === -1)
+                    return;
+                console.log("Price check passed");
+                notificationShowing = true;
+                image.setAttribute("style", `background-image: url("${params.img ? params.img : notif.image}")`);
+                title.innerText = params.title ? replaceAll(replaceAll(replaceAll(params.title, "{user}", notif.user), "{reward}", notif.title), "{price}", notif.price) : `${notif.user} spent ${notif.price} on ${notif.title}`;
+                message.innerText = notif.text;
+                container.setAttribute("class", "");
+                if (params.audioUrl && (audioPrices.length === 0 || audioPrices.indexOf(notif.price) !== -1)) {
+                    console.log("Playing audio", params.audioUrl);
+                    try {
+                        audio = new Audio();
+                        audio.src = params.audioUrl;
+                        audio.volume = params.audioVolume ? parseFloat(params.audioVolume) : 1;
+                        audio.play();
+                        await new Promise((res) => {
+                            audio.onended = res;
+                            audio.onerror = (e) => { console.log(e); res() };
+                        })
+                    } catch (e) {
+                        console.log("Audio playback error:", e)
+                    }
                 }
-            }
-            if (params.tts && (ttsPrices.length === 0 || ttsPrices.indexOf(notif.price) !== -1)) {
-                console.log("Playing TTS");
-                try {
-                    await GoogleTTS.textToSpeech(notif.text, params.ttsLang ? params.ttsLang : "en");
-                    console.log("TTS ended");
-                } catch (e) {
-                    console.log("TTS error:", e)
+                if (params.tts && (ttsPrices.length === 0 || ttsPrices.indexOf(notif.price) !== -1)) {
+                    console.log("Playing TTS");
+                    try {
+                        await GoogleTTS.textToSpeech(notif.text, params.ttsLang ? params.ttsLang : "en");
+                        console.log("TTS ended");
+                    } catch (e) {
+                        console.log("TTS error:", e)
+                    }
                 }
+                await sleep(parseInt(params.showTime ? params.showTime : 7500));
+                notificationShowing = false;
+                container.setAttribute("class", "hide");
             }
-            await sleep(parseInt(params.showTime ? params.showTime : 7500));
-            notificationShowing = false;
-            container.setAttribute("class", "hide");
+            await sleep(1000);
         }
-    }, 1000);
+    })();
 
     function connect() {
         ws = new WebSocket("wss://pubsub-edge.twitch.tv");
