@@ -67,9 +67,14 @@ window.onload = () => {
     }
     title.setAttribute("style", titleStyle);
 
-    if (params.imageStyle) {
-        image.setAttribute("style", params.imageStyle);
+    let imageStyle = "";
+    if (params.imageHeight) {
+        imageStyle += `height: ${params.imageHeight};`;
     }
+    if (params.imageStyle) {
+        imageStyle += params.imageStyle;
+    }
+    image.setAttribute("style", imageStyle);
 
     let showPrices = [];
     let audioPrices = [];
@@ -132,7 +137,7 @@ window.onload = () => {
                     return;
                 console.log("Price check passed");
                 notificationShowing = true;
-                image.setAttribute("style", `background-image: url("${params.img ? params.img : notif.image}")`);
+                image.setAttribute("src", params.img ? params.img : notif.image);
                 title.innerText = params.title ? replaceAll(replaceAll(replaceAll(params.title, "{user}", notif.user), "{reward}", notif.title), "{price}", notif.price) : `${notif.user} spent ${notif.price} on ${notif.title}`;
                 message.innerText = notif.text;
                 container.setAttribute("class", "");
