@@ -25,18 +25,18 @@ let GoogleTTS = {
                 current = "";
                 break;
             }
-            if (current.length + word.length <= 199) {
+            if (current.length + word.length <= 99) {
                 current += word + " ";
                 words.shift();
             } else if (current.length > 0) {
                 result.push(current);
                 current = "";
             } else {
-                current = word.substring(0, 198);
+                current = word.substring(0, 98);
                 result.push(current);
                 current = "";
                 words.shift();
-                words.unshift(word.substring(198, word.length - 1));
+                words.unshift(word.substring(98, word.length - 1));
             }
         }
         return result;
