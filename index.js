@@ -138,7 +138,7 @@ window.onload = () => {
                 notificationShowing = true;
                 image.setAttribute("src", params.img ? params.img : notif.image);
                 title.innerText = params.title ? replaceAll(replaceAll(replaceAll(params.title, "{user}", notif.user), "{reward}", notif.title), "{price}", notif.price) : `${notif.user} spent ${notif.price} on ${notif.title}`;
-                message.innerText = notif.text;
+                message.innerText = notif.text || "";
                 container.setAttribute("class", "");
                 if (params.audioUrl && (audioPrices.length === 0 || audioPrices.indexOf(notif.price) !== -1)) {
                     console.log("Playing audio", params.audioUrl);
@@ -155,7 +155,7 @@ window.onload = () => {
                         console.log("Audio playback error:", e)
                     }
                 }
-                if (params.tts && (ttsPrices.length === 0 || ttsPrices.indexOf(notif.price) !== -1)) {
+                if (notif.text && params.tts && (ttsPrices.length === 0 || ttsPrices.indexOf(notif.price) !== -1)) {
                     console.log("Playing TTS");
                     try {
                         await GoogleTTS.textToSpeech(notif.text, params.ttsLang ? params.ttsLang : "en");
