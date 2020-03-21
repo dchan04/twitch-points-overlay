@@ -126,16 +126,14 @@ window.onload = () => {
 
     let notifications = [];
 
-    let notificationShowing = false;
     (async () => {
         while (true) {
-            if (!notificationShowing && notifications.length > 0) {
+            if (notifications.length > 0) {
                 let notif = notifications.pop();
                 console.log("Notification showing", notif);
                 if (showPrices.length !== 0 && showPrices.indexOf(notif.price) === -1)
                     return;
                 console.log("Price check passed");
-                notificationShowing = true;
                 image.setAttribute("src", params.img ? params.img : notif.image);
                 title.innerText = params.title ? replaceAll(replaceAll(replaceAll(params.title, "{user}", notif.user), "{reward}", notif.title), "{price}", notif.price) : `${notif.user} spent ${notif.price} on ${notif.title}`;
                 message.innerText = notif.text || "";
@@ -165,8 +163,8 @@ window.onload = () => {
                     }
                 }
                 await sleep(parseInt(params.showTime ? params.showTime : 7500));
-                notificationShowing = false;
                 container.setAttribute("class", "hide");
+                console.log("Notification ended");
             }
             await sleep(1000);
         }
