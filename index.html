@@ -1,48 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Channel Points Notifications</title>
     <style>
-        #points-notification-image {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            margin-bottom: 10px;
-        }
-        #points-notification-title {
-            text-align: center;
-            font-size: 25px;
-            font-family: sans-serif;
-        }
-        #points-notification-message {
-            font-size: 18px;
-            font-family: sans-serif;
-            text-align: center;
-        }
-        #points-notification-container {
-            position: absolute;
-            top: 50%;
-            width: 95%;
-            transform: translate(0, -50%);
-            transition: opacity 0.5s linear;
-        }
-        .hide {
-            opacity: 0;
-        }
+      @import url(https://fonts.googleapis.com/css?family=Fjalla+One);
+      #points-notification-image {
+        display: block;
+        margin-left: auto;
+        margin-right: 33%;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        border-radius: 80%;
+        margin-bottom: 10px;
+      }
+      #points-notification-message {
+        text-align: center;
+        font-size: 80px;
+        font-family: sans-serif;
+        padding-left: 27%;
+      }
+      #points-notification-container {
+        position: absolute;
+        top: 50%;
+        width: 95%;
+        transform: translate(0, -47%);
+        transition: opacity 0.5s linear;
+      }
+      span {
+        transform: skew(-10deg);
+        display: block;
+        float: left;
+        text-shadow: #533d4a 1px 1px, #533d4a 2px 2px, #533d4a 3px 3px,
+          #533d4a 4px 4px, #533d4a 5px 5px, #533d4a 6px 6px;
+        min-width: 10px;
+        min-height: 10px;
+        position: relative;
+      }
+      .title {
+        color: #2b9f5e;
+        text-transform: uppercase;
+        font-size: 35px;
+        transform: translateX(-50%) rotate(-10deg);
+        display: block;
+        float: left;
+        left: 50%;
+        position: relative;
+        font-family: sans-serif;
+        text-align: center;
+      }
+      .title2 {
+        color: #e55643;
+        text-transform: uppercase;
+        font-size: 35px;
+        transform: translateX(-50%) rotate(-10deg);
+        display: block;
+        float: left;
+        left: 19%;
+        position: relative;
+        font-family: sans-serif;
+        text-align: center;
+        margin-top: 2em;
+      }
+      .hide {
+        opacity: 0;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="points-notification-container" class="hide">
-        <img id="points-notification-image">
-        <div id="points-notification-title"></div>
-        <div id="points-notification-message"></div>
+      <img id="points-notification-image" />
+      <div id="points-notification-message"></div>
+      <h1 class="title">
+        <span id="points-notification-title"></span>
+      </h1>
+      <h1 class="title2">
+        <span id="points-notification-title2"></span>
+      </h1>
     </div>
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.js"
+      integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.0/TweenMax.min.js"></script>
+    ﻿
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lettering.js/0.7.0/jquery.lettering.min.js"></script>
     <script src="./tts.js"></script>
     <script src="./bundle.js"></script>
-</body>
+    <script>
+      window.addEventListener("load", function () {
+        console.log("This function is executed once the page is fully loaded");
+      });
+    </script>
+  </body>
 </html>

@@ -4,34 +4,38 @@ const ChatClient = require("twitch-chat-client").default;
 
 let params;
 (window.onpopstate = function () {
-    let match,
-        pl = /\+/g,
-        search = /([^&=]+)=?([^&]*)/g,
-        decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
-        query = window.location.search.substring(1);
+  let match,
+    pl = /\+/g,
+    search = /([^&=]+)=?([^&]*)/g,
+    decode = function (s) {
+      return decodeURIComponent(s.replace(pl, " "));
+    },
+    query = window.location.search.substring(1);
 
-    params = {};
-    while (match = search.exec(query))
-        params[decode(match[1])] = decode(match[2]);
+  params = {};
+  while ((match = search.exec(query)))
+    params[decode(match[1])] = decode(match[2]);
 })();
 
 function sleep(miliseconds) {
-    return new Promise(res => {
-        setTimeout(res, miliseconds)
-    });
+  return new Promise((res) => {
+    setTimeout(res, miliseconds);
+  });
 }
 
 function replaceAll(text, find, replaceWith) {
-    let re = new RegExp(find, "g");
-    return text.replace(re, replaceWith);
+  let re = new RegExp(find, "g");
+  return text.replace(re, replaceWith);
 }
 
 window.onload = () => {
-    const container = document.getElementById("points-notification-container");
-    const image = document.getElementById("points-notification-image");
-    const title = document.getElementById("points-notification-title");
-    const message = document.getElementById("points-notification-message");
-    
+  const container = document.getElementById("points-notification-container");
+  const image = document.getElementById("points-notification-image");
+  const title = document.getElementById("points-notification-title");
+  const title2 = document.getElementById("points-notification-title2");
+  const message = document.getElementById("points-notification-message");
+
+  /*
     let textStyle = "";
     
     if (params.textColor) {
@@ -54,7 +58,7 @@ window.onload = () => {
     if (params.titleColor) {
         titleStyle += `color: ${params.titleColor};`;
     } else {
-        titleStyle += "color: white;";
+        titleStyle += "color: black;";
     }
     if (params.titleSize) {
         titleStyle += `font-size: ${params.titleSize};`;
@@ -65,209 +69,291 @@ window.onload = () => {
         titleStyle += params.titleStyle;
     }
     title.setAttribute("style", titleStyle);
+    */
+  let imageStyle = "";
+  if (params.imageHeight) {
+    imageStyle += `height: ${params.imageHeight};`;
+  }
+  if (params.imageStyle) {
+    imageStyle += params.imageStyle;
+  }
+  image.setAttribute("style", imageStyle);
 
-    let imageStyle = "";
-    if (params.imageHeight) {
-        imageStyle += `height: ${params.imageHeight};`;
+  let showPrices = [];
+  let audioPrices = [];
+  let ttsPrices = [];
+
+  if (params.showPrices) {
+    let items = params.showPrices.split(",");
+    for (item of items) {
+      showPrices.push(parseInt(item));
     }
-    if (params.imageStyle) {
-        imageStyle += params.imageStyle;
+  }
+
+  if (params.audioPrices) {
+    let items = params.audioPrices.split(",");
+    for (item of items) {
+      audioPrices.push(parseInt(item));
     }
-    image.setAttribute("style", imageStyle);
+  }
 
-    let showPrices = [];
-    let audioPrices = [];
-    let ttsPrices = [];
-
-    if (params.showPrices) {
-        let items = params.showPrices.split(",");
-        for (item of items) {
-            showPrices.push(parseInt(item));
-        }
+  if (params.ttsPrices) {
+    let items = params.ttsPrices.split(",");
+    for (item of items) {
+      ttsPrices.push(parseInt(item));
     }
+  }
 
-    if (params.audioPrices) {
-        let items = params.audioPrices.split(",");
-        for (item of items) {
-            audioPrices.push(parseInt(item));
-        }
-    }
-
-    if (params.ttsPrices) {
-        let items = params.ttsPrices.split(",");
-        for (item of items) {
-            ttsPrices.push(parseInt(item));
-        }
-    }
-
-    if (params.botChannelName) {
-        (async () => {
-            let chatClient = new ChatClient()
-
-            chatClient.onPrivmsg((_, user, message, msg) => {
-                if (msg.tags.get("msg-id") === "highlighted-message") {
-                    notifications.push({
-                        image: "https://static-cdn.jtvnw.net/automatic-reward-images/highlight-4.png",
-                        title: params.highlightTitle ? params.highlightTitle : "Highlight My Message",
-                        price: params.highlightPrice ? parseInt(params.highlightPrice) : 500,
-                        user: user,
-                        text: message,
-                    });
-                }
-            })
-            chatClient.onRegister(async () => await chatClient.join(params.botChannelName))
-            await chatClient.connect();
-        })()
-    }
-
-    let ws = undefined;
-    let pong = false;
-    let interval = false;
-
-    let notifications = [];
-
+  if (params.botChannelName) {
     (async () => {
-        while (true) {
-            if (notifications.length > 0) {
-                let notif = notifications.pop();
-                console.log("Notification showing", notif);
-                if (showPrices.length !== 0 && showPrices.indexOf(notif.price) === -1)
-                    return;
-                console.log("Price check passed");
-                image.setAttribute("src", params.img ? params.img : notif.image);
-                title.innerText = params.title ? replaceAll(replaceAll(replaceAll(params.title, "{user}", notif.user), "{reward}", notif.title), "{price}", notif.price) : `${notif.user} spent ${notif.price} on ${notif.title}`;
-                message.innerText = notif.text || "";
-                container.setAttribute("class", "");
-                if (params.audioUrl && (audioPrices.length === 0 || audioPrices.indexOf(notif.price) !== -1)) {
-                    console.log("Playing audio", params.audioUrl);
-                    try {
-                        audio = new Audio();
-                        audio.src = params.audioUrl;
-                        audio.volume = params.audioVolume ? parseFloat(params.audioVolume) : 1;
-                        audio.play();
-                        await new Promise((res) => {
-                            audio.onended = res;
-                            audio.onerror = (e) => { console.log(e); res() };
-                        })
-                    } catch (e) {
-                        console.log("Audio playback error:", e)
-                    }
-                }
-                if (notif.text && params.tts && (ttsPrices.length === 0 || ttsPrices.indexOf(notif.price) !== -1)) {
-                    console.log("Playing TTS");
-                    try {
-                        await GoogleTTS.textToSpeech(notif.text, params.ttsLang ? params.ttsLang : "en");
-                        console.log("TTS ended");
-                    } catch (e) {
-                        console.log("TTS error:", e)
-                    }
-                }
-                await sleep(parseInt(params.showTime ? params.showTime : 7500));
-                container.setAttribute("class", "hide");
-                console.log("Notification ended");
-            }
-            await sleep(1000);
+      let chatClient = new ChatClient();
+
+      chatClient.onPrivmsg((_, user, message, msg) => {
+        if (msg.tags.get("msg-id") === "highlighted-message") {
+          notifications.push({
+            image:
+              "https://static-cdn.jtvnw.net/automatic-reward-images/highlight-4.png",
+            title: params.highlightTitle
+              ? params.highlightTitle
+              : "Highlight My Message",
+            price: params.highlightPrice
+              ? parseInt(params.highlightPrice)
+              : 500,
+            user: user,
+            text: message,
+          });
         }
+      });
+      chatClient.onRegister(
+        async () => await chatClient.join(params.botChannelName)
+      );
+      await chatClient.connect();
     })();
+  }
 
-    function connect() {
-        ws = new WebSocket("wss://pubsub-edge.twitch.tv");
-        listen();
-    }
-    function disconnect() {
-        if (interval) {
-            clearInterval(interval);
-            interval = false;
+  let ws = undefined;
+  let pong = false;
+  let interval = false;
+
+  let notifications = [];
+
+  (async () => {
+    while (true) {
+      if (notifications.length > 0) {
+        let notif = notifications.pop();
+        console.log("Notification showing", notif);
+        if (showPrices.length !== 0 && showPrices.indexOf(notif.price) === -1)
+          return;
+        console.log("Price check passed");
+        title.innerText = params.title
+          ? replaceAll(
+              replaceAll(
+                replaceAll(params.title, "{user}", notif.user),
+                "{reward}",
+                notif.title
+              ),
+              "{price}",
+              notif.price
+            )
+          : `${notif.user} spent ${notif.price} on ${notif.title}`;
+        title2.innerText = params.title2
+          ? replaceAll(
+              replaceAll(
+                replaceAll(params.title2, "{user}", notif.user),
+                "{reward}",
+                notif.title
+              ),
+              "{price}",
+              notif.price
+            )
+          : `${notif.user} spent ${notif.price} on ${notif.title}`;
+        message.innerText = notif.text || "";
+        container.setAttribute("class", "");
+        $(".title").lettering();
+        $(".title2").lettering();
+        animation();
+        image.setAttribute("src", params.img ? params.img : notif.image);
+        if (
+          params.audioUrl &&
+          (audioPrices.length === 0 || audioPrices.indexOf(notif.price) !== -1)
+        ) {
+          console.log("Playing audio", params.audioUrl);
+          try {
+            audio = new Audio();
+            audio.src = params.audioUrl;
+            audio.volume = params.audioVolume
+              ? parseFloat(params.audioVolume)
+              : 1;
+            audio.play();
+            await new Promise((res) => {
+              audio.onended = res;
+              audio.onerror = (e) => {
+                console.log(e);
+                res();
+              };
+            });
+          } catch (e) {
+            console.log("Audio playback error:", e);
+          }
         }
-        ws.close();
+        if (
+          notif.text &&
+          params.tts &&
+          (ttsPrices.length === 0 || ttsPrices.indexOf(notif.price) !== -1)
+        ) {
+          console.log("Playing TTS");
+          try {
+            await GoogleTTS.textToSpeech(
+              notif.text,
+              params.ttsLang ? params.ttsLang : "en"
+            );
+            console.log("TTS ended");
+          } catch (e) {
+            console.log("TTS error:", e);
+          }
+        }
+        await sleep(parseInt(params.showTime ? params.showTime : 7500));
+        container.setAttribute("class", "hide");
+        console.log("Notification ended");
+      }
+      await sleep(1000);
     }
+  })();
 
-    function listen() {
-        ws.onmessage = (a) => {
-            let o = JSON.parse(a.data);
-            switch (o.type) {
-                case "PING":
-                    ws.send(JSON.stringify({
-                        "type": "PONG"
-                    }));
-                    break;
-                case "PONG":
-                    pong = true;
-                    break;
-                case "RECONNECT":
-                    disconnect();
-                    connect();
-                    break;
-                case "RESPONCE":
-                    console.log("PubSub responce ", o.error)
-                    break;
-                case "MESSAGE":
-                    switch (o.data.topic) {
-                        case `community-points-channel-v1.${params.channelId}`:
-                            let msg = JSON.parse(o.data.message);
-                            console.log(msg);
-                            switch (msg.type) {
-                                case "reward-redeemed":
-                                    let reward = msg.data.redemption.reward;
-                                    let imageUrl = undefined;
+  function animation() {
+    var title1 = new TimelineMax();
+    var title2 = new TimelineMax();
+    title1.staggerFromTo(
+      ".title span",
+      0.5,
+      { ease: Back.easeOut.config(1.7), opacity: 0, bottom: -80 },
+      { ease: Back.easeOut.config(1.7), opacity: 1, bottom: 0 },
+      0.05
+    );
+    title2.staggerFromTo(
+      ".title2 span",
+      0.5,
+      { ease: Back.easeOut.config(1.7), opacity: 0, bottom: -80 },
+      { ease: Back.easeOut.config(1.7), opacity: 1, bottom: 0 },
+      0.05
+    );
+  }
 
-                                    let img = reward.image;
-                                    let defimg = reward.default_image;
+  function connect() {
+    ws = new WebSocket("wss://pubsub-edge.twitch.tv");
+    listen();
+  }
+  function disconnect() {
+    if (interval) {
+      clearInterval(interval);
+      interval = false;
+    }
+    ws.close();
+  }
 
-                                    if (img) {
-                                        if (img.url_4x) {
-                                            imageUrl = img.url_4x;
-                                        } else if (img.url_2x) {
-                                            imageUrl = img.url_2x;
-                                        } else if (img.url_1x) {
-                                            imageUrl = img.url_1x;
-                                        }
-                                    } else if (defimg) {
-                                        if (defimg.url_4x) {
-                                            imageUrl = defimg.url_4x;
-                                        } else if (defimg.url_2x) {
-                                            imageUrl = defimg.url_2x;
-                                        } else if (defimg.url_1x) {
-                                            imageUrl = defimg.url_1x;
-                                        }
-                                    }
-                                    else {
-                                        imageUrl = params.defImg ? params.defImg : "https://static-cdn.jtvnw.net/custom-reward-images/default-4.png"
-                                    }
-                                    let notif = {
-                                        image: imageUrl,
-                                        title: reward.title,
-                                        price: reward.cost,
-                                        user: msg.data.redemption.user.display_name,
-                                        text: msg.data.redemption.user_input,
-                                    };
-                                    console.log("Notification queued", notif);
-                                    notifications.push(notif);
-                                    break;
-                            }
-                            break;
+  function listen() {
+    ws.onmessage = (a) => {
+      let o = JSON.parse(a.data);
+      switch (o.type) {
+        case "PING":
+          console.log("PING");
+          ws.send(
+            JSON.stringify({
+              type: "PONG",
+            })
+          );
+          break;
+        case "PONG":
+          console.log("PONG");
+          pong = true;
+          break;
+        case "RECONNECT":
+          console.log("RECONNECT");
+          disconnect();
+          connect();
+          break;
+        case "RESPONCE":
+          console.log("PubSub responce ", o.error);
+          break;
+        case "MESSAGE":
+          console.log("MESSAGE");
+          switch (o.data.topic) {
+            case `community-points-channel-v1.${params.channelId}`:
+              let msg = JSON.parse(o.data.message);
+              console.log(msg);
+              switch (msg.type) {
+                case "reward-redeemed":
+                  let reward = msg.data.redemption.reward;
+                  let imageUrl = undefined;
+
+                  let img = reward.image;
+                  let defimg = reward.default_image;
+
+                  if (img) {
+                    if (img.url_4x) {
+                      imageUrl = img.url_4x;
+                    } else if (img.url_2x) {
+                      imageUrl = img.url_2x;
+                    } else if (img.url_1x) {
+                      imageUrl = img.url_1x;
                     }
-                    break;
-            }
+                  } else if (defimg) {
+                    if (defimg.url_4x) {
+                      imageUrl = defimg.url_4x;
+                    } else if (defimg.url_2x) {
+                      imageUrl = defimg.url_2x;
+                    } else if (defimg.url_1x) {
+                      imageUrl = defimg.url_1x;
+                    }
+                  } else {
+                    imageUrl = params.defImg
+                      ? params.defImg
+                      : "https://static-cdn.jtvnw.net/custom-reward-images/default-4.png";
+                  }
+                  let notif = {
+                    image: imageUrl,
+                    title: reward.title,
+                    price: reward.cost,
+                    user: msg.data.redemption.user.display_name,
+                    text: msg.data.redemption.user_input,
+                  };
+                  console.log("Notification queued", notif);
+                  notifications.push(notif);
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+    };
+    ws.onopen = () => {
+      ws.send(
+        JSON.stringify({
+          type: "LISTEN",
+          nonce: "pepega",
+          data: {
+            topics: ["community-points-channel-v1." + params.channelId],
+            auth_token: "",
+          },
+        })
+      );
+      interval = setInterval(async () => {
+        ws.send(
+          JSON.stringify({
+            type: "PING",
+          })
+        );
+        await sleep(5000);
+        if (pong) {
+          pong = false;
+        } else {
+          pong = false;
+          disconnect();
+          connect();
         }
-        ws.onopen = () => {
-            ws.send(JSON.stringify({ "type": "LISTEN", "nonce": "pepega", "data": { "topics": ["community-points-channel-v1." + params.channelId], "auth_token": "" } }));
-            interval = setInterval(async () => {
-                ws.send(JSON.stringify({
-                    "type": "PING"
-                }));
-                await sleep(5000);
-                if (pong) {
-                    pong = false;
-                }
-                else {
-                    pong = false;
-                    disconnect();
-                    connect();
-                }
-            }, 5 * 60 * 1000)
-        }
-    }
+      }, 5 * 60 * 1000);
+    };
+  }
 
-    connect();
-}
+  connect();
+};
